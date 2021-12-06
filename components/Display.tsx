@@ -21,7 +21,7 @@ const viewStyle = {
 }
 
 export default function Display({milis}: Props) {
-  const value = (milis/1000.0).toFixed(1).toString().padStart(5, 0);
+  const value = (milis/1000.0).toFixed(1).toString().padStart(5, "0");
   return (<View style={viewStyle}>
     <Text style={textStyle}>{value}</Text>
   </View>);
