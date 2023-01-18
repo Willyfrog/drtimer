@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { Button, StyleSheet, TextInput } from 'react-native';
+import { Button, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import Display from '../components/Display';
 import { FontAwesome } from '@expo/vector-icons';
 
@@ -30,7 +30,7 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<'TabOne'
 
   const switchSonoff = () => {
     const time = Number(timer);
-    if (isNaN(time)) {
+    if (isNaN(time) || time <= 0) {
       return // raise error
     }
     setInProgress(true);
@@ -46,7 +46,7 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<'TabOne'
         sendSwitch("192.168.0.14", "8081", "1000c81355", 'off');
         clearInterval(endTimer);
         setInProgress(false);
-        setCountDown(Number(timer)*1000);
+        setCountDown(time*1000);
       }, 
       time*1000
     );
@@ -54,16 +54,15 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<'TabOne'
 
   return (
     <View style={styles.container}>
-      <View>
+      <View style={styles.row}>
+        <View style={{flex:1}}/>
         <Display milis={countDown}/>
-        <FontAwesome size={30} style={{ marginBottom: -3 }} name={"pencil"} >
-          <Button 
-            title=""
-            onPress={() => {
-              console.log('pulso!');
-            }}
-          />
-        </FontAwesome>
+        <TouchableOpacity style={styles.editButton} onPress={ () => {
+          console.log('pulsó');
+        }}>
+          <FontAwesome size={30} name={"pencil"} />
+        </TouchableOpacity>
+        <View style={{flex:1}}/>
       </View>
       <TextInput
         value={timer.toString()}
@@ -75,7 +74,7 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<'TabOne'
       />
       <Button
         onPress={switchSonoff}
-        title={'Switch Sonoff'}
+        title={'Start'}
         disabled={inProgress}
       />
     </View>
@@ -88,6 +87,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  row: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+  },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -96,5 +101,19 @@ const styles = StyleSheet.create({
     marginVertical: 30,
     height: 1,
     width: '80%',
+  },
+  editButton: {
+    flex: 1,
+    backgroundColor: 'lightgrey',
+    justifyContent: 'center',
+    borderRadius: 4,
+    padding: 2,
+    margin: 2,
+  },
+  startButton: {
+    backgroundColor: 'lightgrey',
+    borderRadius: 4,
+    padding: 2,
+    margin: 2,
   },
 });

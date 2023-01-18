@@ -9,11 +9,12 @@ type Props = {
 const textStyle = {
   fontFamily: "alarm-clock",
   fontSize: 64,
-  textAlign: "left" as const,
+  textAlign: "right" as const,
   color: "white" as const,
 };
 
 const viewStyle = {
+  flex: 3,
   backgroundColor: "grey" as const,
   borderRadius: 4,
   padding: 5,
