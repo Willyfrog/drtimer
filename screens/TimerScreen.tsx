@@ -23,7 +23,7 @@ const sendSwitch = (ip: string, port: (string|number), deviceId: string, newStat
 
 }
 
-export default function TabOneScreen({ navigation }: RootTabScreenProps<'TabOne'>) {
+export default function TimerScreen() {
   const [inProgress, setInProgress] = useState(false);
   const [timer, setTimer] = useState("0.0");
   const [countDown, setCountDown] = useState(Number(timer)*1000);
