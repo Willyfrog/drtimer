@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import { Button, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import Display from '../components/Display';
+import Memo from '../components/Memo';
 import { FontAwesome } from '@expo/vector-icons';
 
 import { View } from '../components/Themed';
@@ -25,16 +26,21 @@ const sendSwitch = (ip: string, port: (string|number), deviceId: string, newStat
 
 export default function TimerScreen() {
   const [inProgress, setInProgress] = useState(false);
-  const [timer, setTimer] = useState("0.0");
-  const [countDown, setCountDown] = useState(Number(timer)*1000);
+  const [timer, setTimer] = useState("0.0"); // used for display and to hold the original value
+  const [countDown, setCountDown] = useState(Number(timer)*1000); // used to do the countdown
+  const [Memo1, setMemo1] = useState(2000); // we might want to keep it from run to run
+  const [Memo2, setMemo2] = useState(10000);
+  const [Memo3, setMemo3] = useState(20000);
+  const [Memo4, setMemo4] = useState(60000);
 
+  // TODO: handle stop
   const switchSonoff = () => {
     const time = Number(timer);
     if (isNaN(time) || time <= 0) {
       return // raise error
     }
     setInProgress(true);
-    sendSwitch("192.168.0.14", "8081", "1000c81355", 'on');
+    sendSwitch("192.168.0.14", "8081", "1000c81355", 'on'); //TODO: find where the sonoff lives
     //setSonoff(!sonoff);
     const endTimer = setInterval(
       () => {
@@ -52,30 +58,78 @@ export default function TimerScreen() {
     );
   };
 
+  const setTime = (value: number) => {
+    const val = value > 0 ? value : 0;
+    setCountDown(val);
+    setTimer((val/1000).toString());
+  }
+
+  const setMemo = (setter: (v: number)=>void) => () => setter(countDown);
+  const getMemo = (v: number) => (() => setTime(v))
+
+  const modify = (mod: number) => () => {
+    const value = countDown + mod*1000;
+    setTime(value);
+  }
+
   return (
     <View style={styles.container}>
-      <View style={styles.row}>
-        <View style={{flex:1}}/>
-        <Display milis={countDown}/>
-        <TouchableOpacity style={styles.editButton} onPress={ () => {
-          console.log('pulsó');
-        }}>
-          <FontAwesome size={30} name={"pencil"} />
-        </TouchableOpacity>
-        <View style={{flex:1}}/>
+      <View style={styles.bigContainer}>
+        <View style={styles.miniRow}>
+          <Button title="+100" onPress={modify(100)} disabled={inProgress}/>
+          <Button title="+10" onPress={modify(10)}  disabled={inProgress}/>
+          <Button title="+1" onPress={modify(1)}  disabled={inProgress}/>
+          <Button title="+.1" onPress={modify(0.1)}  disabled={inProgress}/>
+        </View>
+        <View style={styles.bigRow}>
+          <View style={{flex:1}}/>
+          <Display milis={countDown}/>
+          <View style={{flex:1}}/>
+        </View>
+        <View style={styles.miniRow}>
+          <Button title="-100" onPress={modify(-100)} disabled={inProgress}/>
+          <Button title="-10" onPress={modify(-10)} disabled={inProgress}/>
+          <Button title="-1" onPress={modify(-1)} disabled={inProgress}/>
+          <Button title="-.1" onPress={modify(-0.1)} disabled={inProgress}/>
+        </View>
       </View>
-      <TextInput
-        value={timer.toString()}
-        keyboardType={"decimal-pad"}
-        onChangeText={(v) => {
-          setTimer(v);  // TODO: remember to validate before trying to start, should be a sw keyboard but might not be.
-          setCountDown(Number(v)*1000);
-        }}
-      />
+      <View style={styles.row}/>
+      <View
+        style={styles.miniRow}
+      >
+        <Memo 
+          milis={Memo1}
+          enabled={!inProgress}
+          getter={getMemo(Memo1)}
+          setter={setMemo(setMemo1)}
+        />
+        <Memo 
+          milis={Memo2}
+          enabled={!inProgress}
+          getter={getMemo(Memo2)}
+          setter={setMemo(setMemo2)}
+        />
+      </View>
+      <View
+        style={styles.miniRow}
+      >
+        <Memo 
+          milis={Memo3}
+          enabled={!inProgress}
+          getter={getMemo(Memo3)}
+          setter={setMemo(setMemo3)}
+        />
+        <Memo 
+          milis={Memo4}
+          enabled={!inProgress}
+          getter={getMemo(Memo4)}
+          setter={setMemo(setMemo4)}
+        />
+      </View>
       <Button
         onPress={switchSonoff}
-        title={'Start'}
-        disabled={inProgress}
+        title={inProgress ? 'Stop' : 'Start'}
+        disabled={inProgress} //TODO: stop the timer on second press
       />
     </View>
   );
@@ -87,8 +141,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  row: {
+  bigContainer: {
+    flex: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  miniRow: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    marginTop: 5,
+    marginBottom: 5,
+    maxHeight: 120,
+  },
+  bigRow: {
+    flex: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    marginTop: 5,
+    marginBottom: 5,
+    maxHeight: 300,
+  },
+  row: {
+    flex: 2,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
